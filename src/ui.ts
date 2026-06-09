@@ -106,8 +106,8 @@ export class UI {
         <button id="ee-overview" class="ee-bookmark" type="button" title="Zoom out to full Estonia overview">
           Estonia ↗
         </button>
-        <button id="ee-elva" class="ee-bookmark" type="button" title="Fly to Elva area (Otepää uplands)">
-          Elva ↗
+        <button id="ee-elva" class="ee-bookmark" type="button" title="Fly to Tallinn">
+          Tallinn ↗
         </button>
         <button id="ee-tartu" class="ee-bookmark" type="button" title="Fly to Tartu">
           Tartu ↗

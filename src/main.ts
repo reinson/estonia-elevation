@@ -94,7 +94,7 @@ map.on("load", () => {
       map.flyTo({ center: ESTONIA_CENTER, zoom: 6.5, duration: 1600 });
     },
     onFlyToElva: () => {
-      map.flyTo({ center: [26.452, 58.241], zoom: 13, duration: 1800 });
+      map.flyTo({ center: [24.745, 59.437], zoom: 13, duration: 1800 });
     },
     onFlyToTartu: () => {
       map.flyTo({ center: [26.729, 58.378], zoom: 13, duration: 1800 });
