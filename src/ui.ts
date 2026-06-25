@@ -27,6 +27,7 @@ export type UIOptions = {
   onFlatSeaToggle: (flatSea: boolean) => void;
   bookmarks?: Bookmark[];
   onBookmark?: (bookmark: Bookmark) => void;
+  onNavigate?: (lat: number, lng: number) => void;
 };
 
 export class UI {
@@ -110,6 +111,23 @@ export class UI {
         </div>
       </div>
 
+      <div class="ee-section ee-goto">
+        <label for="ee-goto-input">Go to coordinates</label>
+        <div class="ee-goto-row">
+          <input
+            id="ee-goto-input"
+            class="ee-goto-input"
+            type="text"
+            inputmode="decimal"
+            autocomplete="off"
+            spellcheck="false"
+            placeholder="57.764063, 26.875972"
+          />
+          <button id="ee-goto-btn" class="ee-goto-btn" type="button" title="Go">Go</button>
+        </div>
+        <div class="ee-goto-error" hidden></div>
+      </div>
+
       <div class="ee-section ee-toggles">
         <button id="ee-flat-sea" class="ee-toggle" type="button" aria-pressed="false">
           Flat sea
@@ -160,6 +178,30 @@ ${
       this.palette = next;
       this.renderLegend();
       this.opts.onPaletteChange(next);
+    });
+
+    const gotoInput = panel.querySelector("#ee-goto-input") as HTMLInputElement;
+    const gotoBtn = panel.querySelector("#ee-goto-btn") as HTMLButtonElement;
+    const gotoError = panel.querySelector(".ee-goto-error") as HTMLElement;
+    const submitGoto = () => {
+      const parsed = parseCoords(gotoInput.value);
+      if (!parsed) {
+        gotoError.textContent = "Enter coordinates as lat, lng";
+        gotoError.hidden = false;
+        return;
+      }
+      gotoError.hidden = true;
+      this.opts.onNavigate?.(parsed.lat, parsed.lng);
+    };
+    gotoBtn.addEventListener("click", submitGoto);
+    gotoInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        submitGoto();
+      }
+    });
+    gotoInput.addEventListener("input", () => {
+      gotoError.hidden = true;
     });
 
     this.lockBtnEl.addEventListener("click", () => {
@@ -351,4 +393,20 @@ function formatMeters(m: number): string {
 
 function formatLngLat(lng: number, lat: number): string {
   return `${lat.toFixed(4)}°N, ${lng.toFixed(4)}°E`;
+}
+
+/**
+ * Parse a "lat, lng" string into coordinates. Accepts comma- or
+ * whitespace-separated decimals (e.g. "57.764063, 26.875972"), with an
+ * optional trailing N/E hemisphere letter.
+ */
+function parseCoords(input: string): { lat: number; lng: number } | null {
+  const cleaned = input.trim().replace(/[°NSEWnsew]/g, " ");
+  const matches = cleaned.match(/-?\d+(?:\.\d+)?/g);
+  if (!matches || matches.length < 2) return null;
+  const lat = parseFloat(matches[0]!);
+  const lng = parseFloat(matches[1]!);
+  if (Number.isNaN(lat) || Number.isNaN(lng)) return null;
+  if (lat < -90 || lat > 90 || lng < -180 || lng > 180) return null;
+  return { lat, lng };
 }

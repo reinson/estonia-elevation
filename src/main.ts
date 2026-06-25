@@ -35,7 +35,23 @@ const BOOKMARKS: Bookmark[] = [
   { name: "Suur Munamägi", url: "http://localhost:5173/#map=13.94/57.71494/27.05909&sea=0" },
   { name: "Kuressaare", url: "http://localhost:5173/#map=14.47/58.24657/22.48205&sea=0" },
   { name: "Kaali", url: "http://localhost:5173/#map=15.09/58.37078/22.6705&sea=0" },
+  { name: "Hinni kanjon", url: "http://localhost:5173/#map=14.58/57.7642/26.87724&sea=0" },
+  { name: "Taevaskoja", url: "http://localhost:5173/#map=14.22/58.10929/27.05283&sea=0" },
 ];
+
+/**
+ * Average zoom level across the city-scale bookmarks, used as the default
+ * zoom when navigating to typed coordinates. The country-wide "Eesti"
+ * bookmark is excluded as an outlier so the average reflects a useful
+ * close-up level (~14).
+ */
+const AVG_BOOKMARK_ZOOM = (() => {
+  const zooms = BOOKMARKS.map((b) => parseBookmark(b.url)?.zoom).filter(
+    (z): z is number => typeof z === "number" && z >= 10,
+  );
+  if (!zooms.length) return 14;
+  return zooms.reduce((a, b) => a + b, 0) / zooms.length;
+})();
 
 /** Parse a `#map=zoom/lat/lng` hash from a bookmark URL. */
 function parseBookmark(
@@ -152,6 +168,9 @@ map.on("load", () => {
       if (target) {
         map.flyTo({ center: target.center, zoom: target.zoom, duration: 1600 });
       }
+    },
+    onNavigate: (lat, lng) => {
+      map.flyTo({ center: [lng, lat], zoom: AVG_BOOKMARK_ZOOM, duration: 1600 });
     },
   });
 });

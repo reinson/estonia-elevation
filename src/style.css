@@ -127,6 +127,57 @@ body {
   border-color: var(--accent);
 }
 
+/* ---------- Go to coordinates ---------- */
+.ee-goto-row {
+  display: flex;
+  gap: 6px;
+}
+
+.ee-goto-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--panel-fg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  font: inherit;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.ee-goto-input::placeholder {
+  color: var(--panel-muted);
+}
+
+.ee-goto-input:focus {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.ee-goto-btn {
+  flex-shrink: 0;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--panel-fg);
+  border: 1px solid var(--panel-border);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font: inherit;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.ee-goto-btn:hover {
+  background: var(--accent);
+  color: #0a1620;
+  border-color: var(--accent);
+}
+
+.ee-goto-error {
+  font-size: 11px;
+  color: #ff9a8d;
+}
+
 /* ---------- Legend ---------- */
 .ee-legend {
   flex-direction: column;
