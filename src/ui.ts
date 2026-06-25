@@ -8,6 +8,7 @@ export type UIOptions = {
   stats: ViewportStats;
   initialPalette: Palette;
   initialFlatSea: boolean;
+  initialLocked?: boolean;
   demMaxZoom: number;
   onPaletteChange: (p: Palette) => void;
   onLockToggle: (locked: boolean) => void;
@@ -39,6 +40,7 @@ export class UI {
     this.opts = opts;
     this.palette = opts.initialPalette;
     this.flatSea = opts.initialFlatSea;
+    this.locked = opts.initialLocked ?? false;
     this.demMaxZoom = opts.demMaxZoom;
     this.build();
     this.bindMapEvents();
@@ -131,6 +133,7 @@ export class UI {
 
     this.legendSeaEl.style.background = FLAT_SEA_COLOR;
     this.applyFlatSeaButtonState();
+    this.applyLockButtonState();
 
     this.paletteSelectEl.addEventListener("change", () => {
       const next = PALETTES.find((p) => p.id === this.paletteSelectEl.value);
@@ -142,9 +145,7 @@ export class UI {
 
     this.lockBtnEl.addEventListener("click", () => {
       this.locked = !this.locked;
-      this.lockBtnEl.setAttribute("aria-pressed", String(this.locked));
-      this.lockBtnEl.classList.toggle("active", this.locked);
-      this.lockBtnEl.textContent = this.locked ? "Range locked" : "Lock range";
+      this.applyLockButtonState();
       this.opts.onLockToggle(this.locked);
     });
 
@@ -192,6 +193,12 @@ export class UI {
     } else {
       this.legendMinEl.textContent = `${formatMeters(this.range[0])}`;
     }
+  }
+
+  private applyLockButtonState(): void {
+    this.lockBtnEl.setAttribute("aria-pressed", String(this.locked));
+    this.lockBtnEl.classList.toggle("active", this.locked);
+    this.lockBtnEl.textContent = this.locked ? "Range locked" : "Lock range";
   }
 
   private applyFlatSeaButtonState(): void {

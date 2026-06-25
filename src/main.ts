@@ -3,9 +3,15 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import "./style.css";
 import { buildStyle } from "./style.ts";
 import { addElevationLayers, applyRamp } from "./elevation.ts";
-import { PALETTES, type Palette } from "./colorRamps.ts";
+import { PALETTES, getPalette, type Palette } from "./colorRamps.ts";
 import { ViewportStats, type ElevationRange } from "./viewportStats.ts";
 import { UI } from "./ui.ts";
+import {
+  readUrlState,
+  writePalette,
+  writeFlatSea,
+  writeLocked,
+} from "./urlState.ts";
 import { maaametWcsProtocol, WCS_MAX_ZOOM } from "./wcsProtocol.ts";
 import type { DemConfig } from "./config.ts";
 
@@ -49,13 +55,25 @@ const map = new maplibregl.Map({
     [19.0, 56.0],
     [31.0, 61.5],
   ],
+  // Sync the map position (z/lat/lng/bearing/pitch) to the URL hash under the
+  // `map` key. MapLibre throttles this and uses history.replaceState, so it is
+  // cheap and never pollutes the back button.
+  hash: "map",
 });
 
 map.addControl(new maplibregl.NavigationControl(), "top-right");
 map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: "metric" }), "bottom-right");
 
-let palette: Palette = PALETTES[0]!;
-let flatSea = true;
+const DEFAULT_PALETTE = PALETTES[0]!;
+const DEFAULT_FLAT_SEA = true;
+const DEFAULT_LOCKED = false;
+
+const urlState = readUrlState();
+let palette: Palette = urlState.palette
+  ? getPalette(urlState.palette)
+  : DEFAULT_PALETTE;
+let flatSea = urlState.flatSea ?? DEFAULT_FLAT_SEA;
+const initialLocked = urlState.locked ?? DEFAULT_LOCKED;
 
 map.on("load", () => {
   addElevationLayers(map, WCS_DEM, palette, INITIAL_RANGE, flatSea);
@@ -71,24 +89,30 @@ map.on("load", () => {
     },
   });
 
+  if (initialLocked) stats.setLocked(true);
+
   const ui = new UI({
     map,
     stats,
     initialPalette: palette,
     initialFlatSea: flatSea,
+    initialLocked,
     demMaxZoom: WCS_MAX_ZOOM,
     onPaletteChange: (p) => {
       palette = p;
       const range = stats.getCurrentRange() ?? INITIAL_RANGE;
       applyRamp(map, p, range, flatSea);
+      writePalette(p.id, DEFAULT_PALETTE.id);
     },
     onLockToggle: (locked) => {
       stats.setLocked(locked);
+      writeLocked(locked, DEFAULT_LOCKED);
     },
     onFlatSeaToggle: (fs) => {
       flatSea = fs;
       const range = stats.getCurrentRange() ?? INITIAL_RANGE;
       applyRamp(map, palette, range, fs);
+      writeFlatSea(fs, DEFAULT_FLAT_SEA);
     },
     onFlyToOverview: () => {
       map.flyTo({ center: ESTONIA_CENTER, zoom: 6.5, duration: 1600 });
