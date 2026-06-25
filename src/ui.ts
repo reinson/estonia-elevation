@@ -19,9 +19,6 @@ export type UIOptions = {
   onPaletteChange: (p: Palette) => void;
   onLockToggle: (locked: boolean) => void;
   onFlatSeaToggle: (flatSea: boolean) => void;
-  onFlyToElva?: () => void;
-  onFlyToTartu?: () => void;
-  onFlyToOverview?: () => void;
 };
 
 export class UI {
@@ -95,12 +92,12 @@ export class UI {
 
       <div class="ee-section ee-legend">
         <div class="ee-legend-stack">
-          <div class="ee-legend-bar"></div>
           <div class="ee-legend-sea" hidden></div>
+          <div class="ee-legend-bar"></div>
         </div>
         <div class="ee-legend-labels">
-          <span class="ee-legend-max">100 m</span>
           <span class="ee-legend-min">0 m</span>
+          <span class="ee-legend-max">100 m</span>
         </div>
       </div>
 
@@ -110,18 +107,6 @@ export class UI {
         </button>
         <button id="ee-lock" class="ee-toggle" type="button" aria-pressed="false">
           Lock range
-        </button>
-      </div>
-
-      <div class="ee-section ee-bookmarks">
-        <button id="ee-overview" class="ee-bookmark" type="button" title="Zoom out to full Estonia overview">
-          Estonia ↗
-        </button>
-        <button id="ee-elva" class="ee-bookmark" type="button" title="Fly to Tallinn">
-          Tallinn ↗
-        </button>
-        <button id="ee-tartu" class="ee-bookmark" type="button" title="Fly to Tartu">
-          Tartu ↗
         </button>
       </div>
 
@@ -163,16 +148,6 @@ export class UI {
       this.applyFlatSeaButtonState();
       this.renderLegend();
       this.opts.onFlatSeaToggle(this.flatSea);
-    });
-
-    (panel.querySelector("#ee-overview") as HTMLButtonElement).addEventListener("click", () => {
-      this.opts.onFlyToOverview?.();
-    });
-    (panel.querySelector("#ee-elva") as HTMLButtonElement).addEventListener("click", () => {
-      this.opts.onFlyToElva?.();
-    });
-    (panel.querySelector("#ee-tartu") as HTMLButtonElement).addEventListener("click", () => {
-      this.opts.onFlyToTartu?.();
     });
 
     const readout = document.createElement("div");
@@ -265,7 +240,7 @@ export class UI {
     const stops = this.palette.stops
       .map(([t, c]) => `${c} ${(t * 100).toFixed(1)}%`)
       .join(", ");
-    this.legendBarEl.style.background = `linear-gradient(to top, ${stops})`;
+    this.legendBarEl.style.background = `linear-gradient(to right, ${stops})`;
     this.legendSeaEl.hidden = !this.flatSea;
     this.legendMaxEl.textContent = `${formatMeters(this.range[1])}`;
     if (this.flatSea) {

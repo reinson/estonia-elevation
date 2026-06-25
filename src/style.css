@@ -129,16 +129,16 @@ body {
 
 /* ---------- Legend ---------- */
 .ee-legend {
-  flex-direction: row;
+  flex-direction: column;
   align-items: stretch;
-  gap: 10px;
-  height: 140px;
+  gap: 6px;
 }
 
 .ee-legend-stack {
   display: flex;
-  flex-direction: column;
-  width: 16px;
+  flex-direction: row;
+  height: 16px;
+  width: 100%;
   flex-shrink: 0;
   border-radius: 4px;
   border: 1px solid rgba(255, 255, 255, 0.18);
@@ -147,23 +147,23 @@ body {
 
 .ee-legend-bar {
   flex: 1;
-  background: linear-gradient(to top, #0a3d7a, #f4f1ec);
+  background: linear-gradient(to right, #0a3d7a, #f4f1ec);
 }
 
 .ee-legend-sea {
-  height: 14px;
+  width: 14px;
+  flex-shrink: 0;
   background: #7da8c9;
-  border-top: 1px solid rgba(255, 255, 255, 0.18);
+  border-right: 1px solid rgba(255, 255, 255, 0.18);
 }
 
 .ee-legend-labels {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   justify-content: space-between;
   font-variant-numeric: tabular-nums;
   font-size: 11px;
   color: var(--panel-muted);
-  flex: 1;
 }
 
 .ee-legend-labels span {
@@ -178,30 +178,6 @@ body {
 .ee-toggles .ee-toggle {
   flex: 1;
   text-align: center;
-}
-
-/* ---------- Bookmarks ---------- */
-.ee-bookmarks {
-  flex-direction: row;
-  gap: 6px;
-}
-
-.ee-bookmark {
-  flex: 1;
-  text-align: center;
-  background: rgba(255, 255, 255, 0.06);
-  color: var(--panel-fg);
-  border: 1px solid var(--panel-border);
-  border-radius: 4px;
-  padding: 5px 8px;
-  font-size: 11px;
-  font-family: inherit;
-  cursor: pointer;
-  transition: background 120ms ease, color 120ms ease;
-}
-
-.ee-bookmark:hover {
-  background: rgba(255, 255, 255, 0.14);
 }
 
 /* ---------- Footer ---------- */
