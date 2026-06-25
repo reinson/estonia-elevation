@@ -9,6 +9,12 @@ import type { ElevationRange, ViewportStats } from "./viewportStats.ts";
 
 export type MapType = "elevation" | "hybrid" | "map";
 
+export type Bookmark = {
+  name: string;
+  /** Full app URL containing a `#map=zoom/lat/lng` hash. */
+  url: string;
+};
+
 export type UIOptions = {
   map: MaplibreMap;
   stats: ViewportStats;
@@ -19,6 +25,8 @@ export type UIOptions = {
   onPaletteChange: (p: Palette) => void;
   onLockToggle: (locked: boolean) => void;
   onFlatSeaToggle: (flatSea: boolean) => void;
+  bookmarks?: Bookmark[];
+  onBookmark?: (bookmark: Bookmark) => void;
 };
 
 export class UI {
@@ -69,6 +77,7 @@ export class UI {
   }
 
   private build(): void {
+    const bookmarks = this.opts.bookmarks ?? [];
     const panel = document.createElement("div");
     panel.className = "ee-panel";
     panel.innerHTML = `
@@ -109,6 +118,22 @@ export class UI {
           Lock range
         </button>
       </div>
+${
+  bookmarks.length
+    ? `
+      <div class="ee-section ee-bookmarks">
+        <label>Bookmarks</label>
+        <div class="ee-bookmark-grid">
+          ${bookmarks
+            .map(
+              (b, i) =>
+                `<button class="ee-bookmark" type="button" data-idx="${i}" title="${b.name}">${b.name}</button>`,
+            )
+            .join("")}
+        </div>
+      </div>`
+    : ""
+}
 
       <footer class="ee-attrib">
         <a href="https://geoportaal.maaamet.ee/" target="_blank" rel="noopener">Maa-amet</a> &middot;
@@ -148,6 +173,14 @@ export class UI {
       this.applyFlatSeaButtonState();
       this.renderLegend();
       this.opts.onFlatSeaToggle(this.flatSea);
+    });
+
+    panel.querySelectorAll<HTMLButtonElement>(".ee-bookmark").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const idx = Number(btn.dataset.idx);
+        const bookmark = bookmarks[idx];
+        if (bookmark) this.opts.onBookmark?.(bookmark);
+      });
     });
 
     const readout = document.createElement("div");

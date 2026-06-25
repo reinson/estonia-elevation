@@ -14,9 +14,41 @@ import {
 } from "./urlState.ts";
 import { maaametWcsProtocol, WCS_MAX_ZOOM } from "./wcsProtocol.ts";
 import type { DemConfig } from "./config.ts";
+import type { Bookmark } from "./ui.ts";
 
 const ESTONIA_CENTER: [number, number] = [25.5, 58.6];
 const INITIAL_RANGE: ElevationRange = [-2, 320];
+
+/**
+ * Bookmarks shown in the side panel. Each `url` just needs a
+ * `#map=zoom/lat/lng` hash (copy it straight from the address bar); the
+ * center and zoom are parsed out on click.
+ */
+const BOOKMARKS: Bookmark[] = [
+  { name: "Eesti", url: "http://localhost:5173/#map=7.18/58.776/25.087&sea=0" },
+  { name: "Tallinn", url: "http://localhost:5173/#map=13.64/59.43398/24.74786&sea=0" },
+  { name: "Tartu", url: "http://localhost:5173/#map=14.1/58.38445/26.71889&sea=0" },
+  { name: "Viljandi", url: "http://localhost:5173/#map=13.99/58.36027/25.60067&sea=0" },
+  { name: "Kohtla-Järve", url: "http://localhost:5173/#map=13.68/59.39285/27.24287&sea=0" },
+  { name: "Narva", url: "http://localhost:5173/#map=14.31/59.37728/28.19851&sea=0" },
+  { name: "Otepää", url: "http://localhost:5173/#map=13.59/58.04705/26.50506&sea=0" },
+  { name: "Suur Munamägi", url: "http://localhost:5173/#map=13.94/57.71494/27.05909&sea=0" },
+  { name: "Kuressaare", url: "http://localhost:5173/#map=14.47/58.24657/22.48205&sea=0" },
+  { name: "Kaali", url: "http://localhost:5173/#map=15.09/58.37078/22.6705&sea=0" },
+];
+
+/** Parse a `#map=zoom/lat/lng` hash from a bookmark URL. */
+function parseBookmark(
+  url: string,
+): { center: [number, number]; zoom: number } | null {
+  const m = url.match(/[#&]map=([\d.]+)\/(-?[\d.]+)\/(-?[\d.]+)/);
+  if (!m) return null;
+  const zoom = parseFloat(m[1]!);
+  const lat = parseFloat(m[2]!);
+  const lng = parseFloat(m[3]!);
+  if (Number.isNaN(zoom) || Number.isNaN(lat) || Number.isNaN(lng)) return null;
+  return { center: [lng, lat], zoom };
+}
 
 /** Live Maa-amet WCS 1 m DTM — fetches tiles on demand from the browser. */
 const WCS_DEM: DemConfig = {
@@ -113,6 +145,13 @@ map.on("load", () => {
       const range = stats.getCurrentRange() ?? INITIAL_RANGE;
       applyRamp(map, palette, range, fs);
       writeFlatSea(fs, DEFAULT_FLAT_SEA);
+    },
+    bookmarks: BOOKMARKS,
+    onBookmark: (bookmark) => {
+      const target = parseBookmark(bookmark.url);
+      if (target) {
+        map.flyTo({ center: target.center, zoom: target.zoom, duration: 1600 });
+      }
     },
   });
 });

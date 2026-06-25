@@ -180,6 +180,40 @@ body {
   text-align: center;
 }
 
+/* ---------- Bookmarks ---------- */
+.ee-bookmarks {
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ee-bookmark-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ee-bookmark {
+  flex: 1 1 calc(50% - 3px);
+  min-width: 0;
+  text-align: center;
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--panel-fg);
+  border: 1px solid var(--panel-border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.ee-bookmark:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
 /* ---------- Footer ---------- */
 .ee-attrib {
   margin-top: 8px;

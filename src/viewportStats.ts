@@ -130,6 +130,7 @@ export class ViewportStats {
   private current: [number, number] | null = null;
   private locked = false;
   private generation = 0;
+  private lastView: { lng: number; lat: number; zoom: number } | null = null;
 
   constructor(map: MaplibreMap, opts: ViewportStatsOptions) {
     this.map = map;
@@ -217,6 +218,8 @@ export class ViewportStats {
     const keys = this.tilesCovering(bounds, z);
     if (keys.length === 0) return;
 
+    this.maybeResetSmoothing(bounds);
+
     this.recompute(keys, gen);
 
     const pending: Promise<unknown>[] = [];
@@ -244,6 +247,31 @@ export class ViewportStats {
     if (pending.length === 0) return;
     await Promise.all(pending);
     this.recompute(keys, gen);
+  }
+
+  /**
+   * Drop the EMA history after a large viewport jump (e.g. a bookmark
+   * `flyTo` or a big manual pan/zoom) so the new area's elevation range is
+   * applied directly instead of being blended with an unrelated previous
+   * location. Without this, jumping to the uplands keeps a too-low max from
+   * the old viewport and the high terrain clamps to the palette's top color.
+   */
+  private maybeResetSmoothing(bounds: LngLatBounds): void {
+    const center = this.map.getCenter();
+    const zoom = this.map.getZoom();
+    const prev = this.lastView;
+    this.lastView = { lng: center.lng, lat: center.lat, zoom };
+    if (!prev) return;
+    const span = Math.max(Math.abs(bounds.getEast() - bounds.getWest()), 1e-6);
+    const moved =
+      Math.max(
+        Math.abs(center.lng - prev.lng),
+        Math.abs(center.lat - prev.lat),
+      ) / span;
+    const dz = Math.abs(zoom - prev.zoom);
+    if (dz >= 1 || moved >= 0.75) {
+      this.current = null;
+    }
   }
 
   private recompute(keys: string[], gen: number): void {
