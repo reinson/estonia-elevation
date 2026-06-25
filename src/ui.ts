@@ -1,7 +1,13 @@
 import type { Map as MaplibreMap, MapMouseEvent } from "maplibre-gl";
 import { PALETTES, type Palette } from "./colorRamps.ts";
-import { FLAT_SEA_COLOR } from "./elevation.ts";
+import {
+  FLAT_SEA_COLOR,
+  HILLSHADE_LAYER_ID,
+  RELIEF_LAYER_ID,
+} from "./elevation.ts";
 import type { ElevationRange, ViewportStats } from "./viewportStats.ts";
+
+export type MapType = "elevation" | "hybrid" | "map";
 
 export type UIOptions = {
   map: MaplibreMap;
@@ -25,6 +31,9 @@ export class UI {
   private locked = false;
   private flatSea: boolean;
   private demMaxZoom: number;
+  private mapType: MapType = "hybrid";
+  private mapTypeBtns: Record<MapType, HTMLButtonElement> =
+    {} as Record<MapType, HTMLButtonElement>;
 
   private legendBarEl!: HTMLElement;
   private legendSeaEl!: HTMLElement;
@@ -178,7 +187,78 @@ export class UI {
     this.zoomInfoEl = zoomInfo;
     this.updateZoomInfo();
 
+    this.buildMapTypeControl();
+
     this.renderLegend();
+  }
+
+  private buildMapTypeControl(): void {
+    const control = document.createElement("div");
+    control.className = "ee-maptype";
+    const items: Array<{ type: MapType; label: string; title: string }> = [
+      { type: "elevation", label: "Elevation", title: "Show only the elevation relief" },
+      { type: "hybrid", label: "Hybrid", title: "Elevation relief over the base map" },
+      { type: "map", label: "Map", title: "Show only the base map" },
+    ];
+    control.innerHTML = items
+      .map(
+        ({ type, label, title }) =>
+          `<button class="ee-maptype-btn" type="button" data-type="${type}" title="${title}">${label}</button>`,
+      )
+      .join("");
+    document.body.appendChild(control);
+
+    for (const { type } of items) {
+      const btn = control.querySelector(
+        `[data-type="${type}"]`,
+      ) as HTMLButtonElement;
+      this.mapTypeBtns[type] = btn;
+      btn.addEventListener("click", () => this.setMapType(type));
+    }
+
+    this.applyMapType();
+  }
+
+  private setMapType(type: MapType): void {
+    if (this.mapType === type) return;
+    this.mapType = type;
+    this.applyMapType();
+  }
+
+  private applyMapType(): void {
+    const map = this.opts.map;
+    const showBasemap = this.mapType !== "elevation";
+    const showElevation = this.mapType !== "map";
+
+    const setVisible = (id: string, visible: boolean) => {
+      if (map.getLayer(id)) {
+        map.setLayoutProperty(id, "visibility", visible ? "visible" : "none");
+      }
+    };
+
+    setVisible("basemap", showBasemap);
+    // Labels (street names, places) belong to the base map; hide them in
+    // elevation-only mode so the relief is completely pure.
+    setVisible("labels", showBasemap);
+    setVisible(RELIEF_LAYER_ID, showElevation);
+    setVisible(HILLSHADE_LAYER_ID, showElevation);
+
+    // In hybrid mode the relief is translucent so the base map blends through;
+    // in elevation-only mode there is nothing meaningful underneath, so make it
+    // fully opaque to get pure, saturated relief colors.
+    if (map.getLayer(RELIEF_LAYER_ID)) {
+      map.setPaintProperty(
+        RELIEF_LAYER_ID,
+        "color-relief-opacity",
+        this.mapType === "elevation" ? 1 : 0.85,
+      );
+    }
+
+    for (const [type, btn] of Object.entries(this.mapTypeBtns)) {
+      const active = type === this.mapType;
+      btn.classList.toggle("active", active);
+      btn.setAttribute("aria-pressed", String(active));
+    }
   }
 
   private renderLegend(): void {

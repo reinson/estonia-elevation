@@ -252,6 +252,45 @@ body {
   background: color-mix(in srgb, var(--accent) 15%, transparent) !important;
 }
 
+/* ---------- Map type selector ---------- */
+.ee-maptype {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  z-index: 10;
+  display: flex;
+  gap: 0;
+  background: var(--panel-bg);
+  border: 1px solid var(--panel-border);
+  border-radius: 999px;
+  padding: 3px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+.ee-maptype-btn {
+  background: transparent;
+  color: var(--panel-muted);
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.ee-maptype-btn:hover {
+  color: var(--panel-fg);
+}
+
+.ee-maptype-btn.active {
+  background: var(--accent);
+  color: #0a1620;
+  font-weight: 600;
+}
+
 /* ---------- Zoom / resolution indicator ---------- */
 .ee-zoom-info {
   position: absolute;
