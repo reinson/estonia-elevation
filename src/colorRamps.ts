@@ -10,7 +10,9 @@ export type Palette = {
 /**
  * Classic cartographic hypsometric tint, tuned for Estonia.
  * Heavy weight at the low end (most of the country is 0-50 m), warming
- * upward through the uplands.
+ * upward through the uplands. The upper range uses more stops to avoid
+ * large washed-out areas in the highlands (Estonia tops out ~320 m, no
+ * alpine snow cap needed).
  */
 const hypsometric: Palette = {
   id: "hypsometric",
@@ -20,31 +22,33 @@ const hypsometric: Palette = {
     [0.04, "#2f7fb2"],
     [0.1, "#7cc2c2"],
     [0.2, "#a8d68a"],
-    [0.34, "#dfd66a"],
-    [0.5, "#c9a14f"],
-    [0.64, "#a9742f"],
-    [0.78, "#834f28"],
-    [0.9, "#6a3b27"],
-    [1.0, "#e9dccb"],
+    [0.35, "#dfd66a"],
+    [0.52, "#c89357"],
+    [0.65, "#a87040"],
+    [0.76, "#7c4a26"],
+    [0.86, "#5e3419"],
+    [0.93, "#7a5a48"],
+    [1.0, "#a89080"],
   ],
 };
 
 /**
  * Same warm cartographic ramp as `hypsometric`, but with the deep-blue / cyan
  * lowland tones removed. Useful when the viewport is entirely on land and you
- * want the full dynamic range spent on greens → yellows → browns → snow.
+ * want the full dynamic range spent on greens → yellows → browns.
  */
 const hypsometricLand: Palette = {
   id: "hypsometric-land",
   name: "Hypsometric (land)",
   stops: [
     [0.0, "#a8d68a"],
-    [0.2, "#dfd66a"],
-    [0.4, "#c9a14f"],
-    [0.58, "#a9742f"],
-    [0.74, "#834f28"],
-    [0.88, "#6a3b27"],
-    [1.0, "#e9dccb"],
+    [0.15, "#dfd66a"],
+    [0.35, "#c89357"],
+    [0.55, "#a87040"],
+    [0.70, "#7c4a26"],
+    [0.82, "#5e3419"],
+    [0.91, "#7a5a48"],
+    [1.0, "#a89080"],
   ],
 };
 
