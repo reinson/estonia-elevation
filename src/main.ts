@@ -113,7 +113,7 @@ map.addControl(new maplibregl.NavigationControl(), "top-right");
 map.addControl(new maplibregl.ScaleControl({ maxWidth: 120, unit: "metric" }), "bottom-right");
 
 const DEFAULT_PALETTE = PALETTES[0]!;
-const DEFAULT_FLAT_SEA = true;
+const DEFAULT_FLAT_SEA = false;
 const DEFAULT_LOCKED = false;
 
 const urlState = readUrlState();
